@@ -1,0 +1,1 @@
+A sample wiki built following the walkthrough here: https://golang.org/doc/articles/wiki/
