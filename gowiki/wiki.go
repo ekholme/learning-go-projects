@@ -1,7 +1,9 @@
 package main
 
 import (
-	"fmt"
+	"html/template"
+	"log"
+	"net/http"
 	"os"
 )
 
@@ -28,11 +30,48 @@ func loadPage(title string) (*Page, error) {
 	return &Page{Title: title, Body: body}, nil //this will return a pointer to a Page literal constructed with title and body values
 }
 
-func main() {
-	p1 := &Page{Title: "TestPage", Body: []byte("This is a sample Page.")}
-	p1.save()
-	p2, _ := loadPage("TestPage")
-	fmt.Println(string(p2.Body))
+//creating a template render function
+func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
+	t, _ := template.ParseFiles(tmpl + ".html")
+	t.Execute(w, p)
 }
 
-//resume at 'Introducing the net/http package' in this doc: https://golang.org/doc/articles/wiki/
+//this lets us view a page
+func viewHandler(w http.ResponseWriter, r *http.Request) {
+	title := r.URL.Path[len("/view/"):]
+	p, err := loadPage(title)
+	//if statement below will redirect a user to an edit page if the page doesn't exist
+	if err != nil {
+		http.Redirect(w, r, "/edit/"+title, http.StatusFound)
+		return
+	}
+	renderTemplate(w, "view", p)
+}
+
+//editHandler will let us edit pages
+func editHandler(w http.ResponseWriter, r *http.Request) {
+	title := r.URL.Path[len("/edit/"):]
+	p, err := loadPage(title)
+	if err != nil {
+		p = &Page{Title: title}
+	}
+	renderTemplate(w, "edit", p)
+}
+
+//saveHandler will handle the submission of forms located on edit pages
+func saveHandler(w http.ResponseWriter, r *http.Request) {
+	title := r.URL.Path[len("/save/"):]
+	body := r.FormValue("body")
+	p := &Page{Title: title, Body: []byte(body)}
+	p.save()
+	http.Redirect(w, r, "/view/"+title, http.StatusFound)
+}
+
+//RESUME AT 'ERROR HANDLING' here: https://golang.org/doc/articles/wiki/
+
+func main() {
+	http.HandleFunc("/view/", viewHandler)
+	http.HandleFunc("/edit/", editHandler)
+	http.HandleFunc("/save/", saveHandler)
+	log.Fatal(http.ListenAndServe(":8080", nil))
+}
