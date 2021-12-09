@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"html/template"
 	"io"
+	"log"
 	"net/http"
+	"strings"
 )
 
 //will ensure that our template can compile when the program is initiated
@@ -32,7 +34,6 @@ var defaultHandlerTmpl = `
     {{end}}
     <ul>
         {{range .Options}}
-        {{.}}
         <li><a href="/{{.Chapter}}">{{.Text}}</a></li>
         {{end}}
     </ul>
@@ -49,10 +50,23 @@ type handler struct {
 }
 
 func (h handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	err := tpl.Execute(w, h.s["intro"])
-	if err != nil {
-		panic(err)
+	path := strings.TrimSpace(r.URL.Path)
+
+	if path == "" || path == "/" {
+		path = "/intro"
 	}
+	path = path[1:] //will get all elements of path from the first index onwards. since go is 0-indexed, this will trim the /
+
+	//the ,ok usage here says 'only do this if you find something in the map'
+	if chapter, ok := h.s[path]; ok {
+		err := tpl.Execute(w, chapter)
+		if err != nil {
+			log.Printf("%v", err)                                                    //log actual error message for developer
+			http.Error(w, "Something went wrong...", http.StatusInternalServerError) //display a standard "something went wrong" error to the user
+		}
+		return
+	}
+	http.Error(w, "Chapter not found", http.StatusNotFound)
 }
 
 func JsonStory(r io.Reader) (Story, error) {
