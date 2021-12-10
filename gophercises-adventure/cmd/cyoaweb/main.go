@@ -31,4 +31,4 @@ func main() {
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", *port), h))
 }
 
-//RESUME AT 'STYLING THE HTML'
+//RESUME AT 'CUSTOM PATHS'
