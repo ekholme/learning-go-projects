@@ -1,0 +1,1 @@
+A CLI TODO list/task manager tool. Created following the tutorial [here](https://courses.calhoun.io/lessons/les_goph_35)
