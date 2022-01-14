@@ -2,7 +2,5 @@ A CLI TODO list/task manager tool. Created following the tutorial [here](https:/
 
 Note that this needs to be called in the terminal using the dir name: "cli-task-manager"
 
-RESUME AT 2:00 "READING FROM BUCKETS" VID
-
 ## Future Directions
 - Use MySQL or Postgres instead of bolt
