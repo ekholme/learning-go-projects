@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 
 	"github.com/ekholme/learning-go-projects/cli-task-manager/cmd"
@@ -12,10 +13,14 @@ import (
 func main() {
 	home, _ := homedir.Dir()
 	dbPath := filepath.Join(home, "tasks.db")
-	err := db.Init(dbPath)
+	must(db.Init(dbPath))
+	must(cmd.RootCmd.Execute())
+}
+
+//this isn't going to be the best approach for a web application, but for this case it's fine?
+func must(err error) {
 	if err != nil {
-		panic(err)
+		fmt.Println(err.Error())
+		os.Exit(1)
 	}
-	fmt.Println("db stuff worked")
-	cmd.RootCmd.Execute()
 }
