@@ -1,1 +1,0 @@
-Creating todo list app from [this tutorial](https://betterprogramming.pub/build-a-simple-todolist-app-in-golang-82297ec25c7d)
