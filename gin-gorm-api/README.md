@@ -1,0 +1,1 @@
+Creating a REST API using Gin and Gorm. Following along with [this tutorial](https://blog.logrocket.com/how-to-build-a-rest-api-with-golang-using-gin-and-gorm/)

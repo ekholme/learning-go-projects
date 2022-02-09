@@ -3,10 +3,11 @@ Some projects as I'm learning Go
 
 # TOC
 
-| Folder | Description | Concepts
+| Folder | Description | Concepts |
 | --- | ----------- | ---- |
 | cli-task-manager | A CLI task manager/TODO list tool | cobra; boltdb |
 | go-mysql | An intro to accessing databases with go | mysql |
+| gin-article-exercise | Web app using Gin to browse articles | gin |
 | gophercises-adventure | a choose-your-own-adventure app | json; html templates |
 | gophercises-link-parser | a tool to parse links from websites | html; DOM; string parsing |
 | gophercises-quiz | creating a quiz game | reading csvs; channels |
