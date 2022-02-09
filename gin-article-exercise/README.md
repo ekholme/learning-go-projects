@@ -1,0 +1,1 @@
+A sample web application built using Gin. Following the tutorial [here](https://semaphoreci.com/community/tutorials/building-go-web-applications-and-microservices-using-gin)
