@@ -66,3 +66,5 @@ func LikeJoke(c *gin.Context) {
 		c.AbortWithStatus(http.StatusNotFound)
 	}
 }
+
+//RESUME WITH "BUILDING THE UI"
