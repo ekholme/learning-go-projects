@@ -94,4 +94,98 @@ func GetOrdersByWaiter(c *gin.Context) {
 	c.JSON(http.StatusOK, orders)
 }
 
-//RESUME AT GetOrderByID
+//get an order by its id
+func GetOrderById(c *gin.Context) {
+	orderID := c.Params.ByName("id")
+
+	docID, _ := primitive.ObjectIDFromHex(orderID)
+
+	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+
+	var order bson.M
+
+	if err := orderCollection.FindOne(ctx, bson.M{"_id": docID}).Decode(&order); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	defer cancel()
+
+	fmt.Println(order)
+
+	c.JSON(http.StatusOK, order)
+}
+
+//update a waiter's name for an order
+func UpdateWaiter(c *gin.Context) {
+	orderID := c.Params.ByName("id")
+	docID, _ := primitive.ObjectIDFromHex(orderID)
+	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+	type Waiter struct {
+		Server *string `json:"server"`
+	}
+	var waiter Waiter
+	if err := c.BindJSON(&waiter); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	result, err := orderCollection.UpdateOne(ctx, bson.M{"_id": docID},
+		bson.D{
+			{"$set", bson.D{{"server", waiter.Server}}},
+		},
+	)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	defer cancel()
+	c.JSON(http.StatusOK, result.ModifiedCount)
+}
+
+//update the order
+func UpdateOrder(c *gin.Context) {
+	orderID := c.Params.ByName("id")
+	docID, _ := primitive.ObjectIDFromHex(orderID)
+	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+	var order models.Order
+	if err := c.BindJSON(&order); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	validationErr := validate.Struct(order)
+	if validationErr != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": validationErr.Error()})
+		return
+	}
+	result, err := orderCollection.ReplaceOne(
+		ctx,
+		bson.M{"_id": docID},
+		bson.M{
+			"dish":   order.Dish,
+			"price":  order.Price,
+			"server": order.Server,
+			"table":  order.Table,
+		},
+	)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	defer cancel()
+	c.JSON(http.StatusOK, result.ModifiedCount)
+}
+
+//delete an order given the id
+func DeleteOrder(c *gin.Context) {
+	orderID := c.Params.ByName("id")
+	docID, _ := primitive.ObjectIDFromHex(orderID)
+	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+	result, err := orderCollection.DeleteOne(ctx, bson.M{"_id": docID})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	defer cancel()
+	c.JSON(http.StatusOK, result.DeletedCount)
+}

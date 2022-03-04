@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 
+	"github.com/ekholme/learning-go-projects/restaurant-orders/routes"
 	"github.com/gin-gonic/gin"
 )
 
