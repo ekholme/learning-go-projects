@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
+	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -13,7 +15,16 @@ import (
 )
 
 func main() {
-	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb+srv://ekholme1:<pw>@testclust.srjym.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"))
+
+	err := godotenv.Load(".env")
+
+	if err != nil {
+		log.Fatal("error loading .env file")
+	}
+
+	MongoDb := os.Getenv("MONGODB_URL")
+
+	client, err := mongo.NewClient(options.Client().ApplyURI(MongoDb))
 	if err != nil {
 		log.Fatal(err)
 	}
