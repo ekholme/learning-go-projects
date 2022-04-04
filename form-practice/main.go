@@ -1,7 +1,9 @@
 package main
 
 import (
+	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -10,7 +12,7 @@ type dare struct {
 	ID       string `json:"id" binding:"required"`
 	Title    string `json:"title" binding:"required"`
 	Text     string `json:"text" binding:"required"`
-	Savagery uint   `json:"savagery" binding:"required,gte=1,lte=10"`
+	Savagery int    `json:"savagery" binding:"required,gte=1,lte=10"`
 }
 
 var dares = []dare{
@@ -45,5 +47,27 @@ func postDares(c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, newDare)
 }
 
-//RESUME -- CHECK OUT THIS PAGE
+func formDare(c *gin.Context) {
+
+	idVal := c.PostForm("id")
+	titleVal := c.PostForm("title")
+	textVal := c.PostForm("text")
+	savVal, err := strconv.Atoi(c.PostForm("savagery"))
+
+	if err != nil {
+		log.Fatal("couldn't convert savagery value")
+	}
+
+	newDare := &dare{idVal, titleVal, textVal, savVal}
+
+	dares = append(dares, *newDare)
+
+	c.JSON(http.StatusCreated, newDare)
+}
+
+//need to render the form and then try out post. process might be to have a page
+//that renders all of the current data, then have the form at the bottom?
+
+//possible form help stuff
 //https://stackoverflow.com/questions/39215772/marshalling-html-form-input-to-json-and-writing-to-file-golang
+//https://stackoverflow.com/questions/48909476/post-html-form-with-golang-gin-backend
