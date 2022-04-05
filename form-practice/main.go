@@ -23,6 +23,10 @@ var dares = []dare{
 func main() {
 	r := gin.Default()
 
+	//serve form & post form data
+	r.Static("/forms", "./forms")
+	r.POST("/forms/testform", formDare)
+
 	r.GET("/dares", getDares)
 	r.POST("/dares", postDares)
 
@@ -62,7 +66,7 @@ func formDare(c *gin.Context) {
 
 	dares = append(dares, *newDare)
 
-	c.JSON(http.StatusCreated, newDare)
+	c.JSON(http.StatusCreated, gin.H{"message": "Dare submitted!"})
 }
 
 //need to render the form and then try out post. process might be to have a page
