@@ -8,6 +8,8 @@ require (
 	go.mongodb.org/mongo-driver v1.8.3
 )
 
+require gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
+
 require (
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect

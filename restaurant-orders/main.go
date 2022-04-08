@@ -33,3 +33,5 @@ func main() {
 	//this runs the server and allows it to listen to requests.
 	router.Run(":" + port)
 }
+
+//so something isn't working here
