@@ -1,77 +1,63 @@
 package main
 
 import (
+	"context"
+	"flag"
 	"log"
-	"net/http"
-	"strconv"
 
-	"github.com/gin-gonic/gin"
+	"cloud.google.com/go/firestore"
 )
 
-type dare struct {
-	ID       string `json:"id" binding:"required"`
-	Title    string `json:"title" binding:"required"`
-	Text     string `json:"text" binding:"required"`
-	Savagery int    `json:"savagery" binding:"required,gte=1,lte=10"`
-}
+func createClient(ctx context.Context) *firestore.Client {
+	// Sets your Google Cloud Platform project ID.
+	projectID := "dares-app-346910"
 
-var dares = []dare{
-	{ID: "1", Title: "Sockhands", Text: "wear socks on your hands", Savagery: 3},
-	{ID: "2", Title: "Bustin Makes me Feel Good", Text: "drink lots of beer while listening to Ghostbusters", Savagery: 6},
+	// [END firestore_setup_client_create]
+	// Override with -project flags
+	flag.StringVar(&projectID, "project", projectID, "The Google Cloud Platform project ID.")
+	flag.Parse()
+
+	// [START firestore_setup_client_create]
+	client, err := firestore.NewClient(ctx, projectID)
+	if err != nil {
+		log.Fatalf("Failed to create client: %v", err)
+	}
+	// Close client when done with
+	// defer client.Close()
+	return client
 }
 
 func main() {
-	r := gin.Default()
 
-	//serve form & post form data
-	r.Static("/forms", "./forms")
-	r.POST("/forms/testform", formDare)
+	ctx := context.Background()
+	client := createClient(ctx)
 
-	r.GET("/dares", getDares)
-	r.POST("/dares", postDares)
+	defer client.Close()
 
-	r.Run("localhost:8080")
-
-}
-
-//function to get all dares
-func getDares(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK, dares)
-}
-
-func postDares(c *gin.Context) {
-	var newDare dare
-
-	if err := c.BindJSON(&newDare); err != nil {
-		return
-	}
-
-	dares = append(dares, newDare)
-
-	c.IndentedJSON(http.StatusCreated, newDare)
-}
-
-func formDare(c *gin.Context) {
-
-	idVal := c.PostForm("id")
-	titleVal := c.PostForm("title")
-	textVal := c.PostForm("text")
-	savVal, err := strconv.Atoi(c.PostForm("savagery"))
+	//add a dare
+	_, _, err := client.Collection("dares").Add(ctx, map[string]interface{}{
+		"id":       "1",
+		"title":    "Sockhands",
+		"text":     "socks on your hands",
+		"savagery": 3,
+	})
 
 	if err != nil {
-		log.Fatal("couldn't convert savagery value")
+		log.Fatalf("failed making sockhands: %v", err)
 	}
 
-	newDare := &dare{idVal, titleVal, textVal, savVal}
+	//add another dare
+	_, _, err = client.Collection("dares").Add(ctx, map[string]interface{}{
+		"id":       "2",
+		"title":    "Tallahassee Bubble Tea",
+		"text":     "dogfood in your beer",
+		"savagery": 5,
+	})
 
-	dares = append(dares, *newDare)
+	if err != nil {
+		log.Fatalf("failed making tbt: %v", err)
+	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "Dare submitted!"})
 }
 
-//need to render the form and then try out post. process might be to have a page
-//that renders all of the current data, then have the form at the bottom?
-
-//possible form help stuff
-//https://stackoverflow.com/questions/39215772/marshalling-html-form-input-to-json-and-writing-to-file-golang
-//https://stackoverflow.com/questions/48909476/post-html-form-with-golang-gin-backend
+//cool, so this works
